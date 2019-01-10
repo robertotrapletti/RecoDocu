@@ -291,9 +291,97 @@ public static Record CreateFromImage(String path, String name) {
 
 Come mostrato sopra, il metodo restituisce un nuovo record. Al Record è collegato una stringa "name" che serve a recuperare il valore corrispondente dell'immagine (come facebook, netflix, o anche l'URL direttamente, dipenderà da come vorrà essere utilizzata la libreria). Prima di restituire l'oggetto viene eseguito il metodo di feature detection e salvati i relativi dati. Questo metodo è pensato per ampliare il database locale qualora i dati precaricati non siano sufficienti o quando l'utente deve riconoscere siti personalizzati. 
 
-La libreria vera e propria è la classe Reco.cs. Espone delle semplici API, come il recupero del nome data un'immagine in input. 
+La libreria vera e propria è la classe Reco.cs. Espone poche API atte a risolvere il problema proposto, come ad esempio il metodo per il recupero del nome data un'immagine in input. 
+
+Attualmente date le tempistiche e lo scopo della libreria (conoscere quali strumenti si possono utilizzare per risolvere questo tipo di problemi) i Record sono serializzati e salvati localmente. Quando si utilizza la libreria si può richiamare un metodo load per caricare il file contenente i record in memoria. In futuro chiaramente si può migliorare questa gestione utilizzando ad esempio un componente come LINQ presente nel framework .NET.
+Sono presenti due funzione per aggiunta e rimozione di record:
+
+
+\begin{lstlisting}[language=C]
+public bool AddImage(String imagePath, String name) {
+            Record record;
+            try
+            {
+                record = Record.CreateFromImage(imagePath, name);
+                records.Add(record);
+                return true;
+            }
+            catch (Exception e) {
+                return false;
+            }
+            
+        }
+        
+        /// <returns>Return true if the Record is found and correctly removed from the repository, else false</returns>
+        public bool RemoveImage(String name) {
+            return records.Remove(records.Find(r=>r.Name.Equals(name)));
+        }
+\end{lstlisting}
+
+Abbiamo programmato un metodo chiamato GetNameList che, dato il percorso di un'immagine, genera un oggetto della classe Record, senza nessun nome associato, dopodichè utilizza le proprietà calcolate per generare un valore di score per ogni confronto. Sfruttando il metodo presente nella classe Utility, Sort List (che abbiamo implementato per ordinare la lista in base allo score di ogni confronto) restituisce una lista ordinata di coppie chiave-valore. La chiave è il nome registrato insieme al record mentre il valore rappresenta lo score risultante dalla comparazione. In questo modo si ottiene una lista di nomi per il quale il primo elemento è l'immagine con più punti in comune con quella in ingresso. 
+
+Il sort è effettuato in questo modo:
+
+\begin{lstlisting}[language=C]
+  public static void sortList(List<KeyValuePair<string, int>> list) {
+            list.Sort(
+                delegate(KeyValuePair<string,int> pair1,
+                KeyValuePair<string,int> pair2) {
+                    return pair1.Value.CompareTo(pair2.Value);
+                }
+            );
+          
+        }
+\end{lstlisting}
+
+Il metodo invece si presenta così:
+
+\begin{lstlisting}[language=C]
+ private List<KeyValuePair<String, int>> GetNameList(String imagePath)
+        {
+            Record processingRecord = Record.CreateFromImage(imagePath, "");
+            var resultList = new List<KeyValuePair<String, int>>();
+            VectorOfVectorOfDMatch matches = new VectorOfVectorOfDMatch();
+            int k = 2;
+            double uniquenessThreshold = 0.8;
+            Mat mask = new Mat();
+
+            records.ForEach(e => {
+                using (Emgu.CV.Flann.LinearIndexParams ip = new Emgu.CV.Flann.LinearIndexParams())
+                using (Emgu.CV.Flann.SearchParams sp = new SearchParams())
+                using (DescriptorMatcher matcher = new FlannBasedMatcher(ip, sp))
+                {
+                    matcher.Add(e.Descriptors);
+
+                    matcher.KnnMatch(processingRecord.Descriptors, matches, k, null);
+                    mask = new Mat(matches.Size, 1, DepthType.Cv8U, 1);
+                    mask.SetTo(new MCvScalar(255));
+                    Features2DToolbox.VoteForUniqueness(matches, uniquenessThreshold, mask);
+
+                    // Calcluate the score based on matches size
+                    int score = 0;
+                    for (int i = 0; i < matches.Size; i++)
+                    {
+                        if (mask.GetData(i)[0] == 0) continue;
+                        foreach (var item in matches[i].ToArray())
+                            ++score;
+                    }
+
+                    // Add score and record's name to the map
+                    resultList.Add(new KeyValuePair<string, int>(e.Name, score));
+                }
+            });
+
+            Utility.sortList(resultList);
+            return resultList;
+        }
+\end{lstlisting}
+Per il confronto delle feature delle immagini esistono sono diverse possibilità. La prima soluzione è la più semplice ma naturalmente la meno efficace, si utilizza un Brute-Force Matcher. Prende in esame un descrittore di una feature della prima immagine e la confronta con il descrittore di ogni feature rilevata nella seconda. Calcola quindi una distanza utilizzando una determinata funzione e ritorna quella più vicina. Nella nostra libreria però noi abbiamo usato il FLANN Based Matcher. FLANN, acronimo di Fast Library for Approximate Nearest Neighbour, è una libreria contenente algoritmi di ricerca ottimizzati di nearest neighbour. In OpenCV, l'oggetto Flann Matcher riceve in ingresso due parametri, index\_params e search\_params. Il primo indica l'algoritmo da utilizzare e ne sono disponibili diversi, ognuno con le sue particolarità. La scelta dipende da quante risorse e quanto tempo si vuole dedicare a questa operazione. Il secondo parametro indica quante volte devono essere attraversati gli alberi nell'indice. Più volte significa più precisione ma naturalmente anche più tempo di elaborazione. 
+
 
 \subsection{test e risultati}%rob
+
+
 \section{implementazione obbiettivi aggiuntivi}%rob
 \subsection{test e risultati}%rob
 
