@@ -25,7 +25,7 @@
   frame=single,	                   % adds a frame around the code
   keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   keywordstyle=\color{blue},       % keyword style
-  language=Octave,                 % the language of the code
+  language=C,                 % the language of the code
   morekeywords={*,...},            % if you want to add more keywords to the set
   numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
   numbersep=5pt,                   % how far the line-numbers are from the code
@@ -99,8 +99,8 @@
 Il progetto affronta come prima parte un problema di riconoscimento immagini utilizzando tecnologie mobile. L’obiettivo della libreria è quello di fornire le funzioni di supporto da utilizzare successivamente con un’applicazione di salvataggio password e documenti. Si vuole facilitarne il recupero permettendo all’utente di eseguire una ricerca tramite foto.
 La seconda parte è un’analisi esplorativa delle tecnologie in ambito di Machine Learning utilizzabili a livello mobile. Per capire quali metodi sono usati attualmente e come funzionano, nella libreria è utilizzato un classificatore per aumentarne la robustezza, determinando se nell’immagine scattata dall’utente è presente uno schermo. 
 \problemsection{Abstract inglese}
-In the first part of this project, we deal with a problem of image recognition using mobile technologies.. The purpose of the library is to provide the support functions to be used later with an application that save passwords and documents. The goal is to facilitate recovery of the access keys by allowing the user to search through photos.
-The second part is an exploratory analysis of the technologies in Machine Learning that can be used on a mobile. To understand which methods are currently used and how they work, a classifier is used in the library to increase its robustness, determining if a screen is present in the image taken by the user.
+In the first part of this project, we deal with a problem of image recognition using mobile technologies. The purpose of this library is to provide the support functions to be used later with an application that saves passwords and documents. The goal is to facilitate recovery of the access keys by allowing the user to search through photos.
+The second part of this research is an exploratory analysis of the technologies in Machine Learning that can be used on a mobile context. To apply an idea of understanding of methods that are currently used and how they work, we added a classifier in the library to increase its robustness, determining if a screen is present in the image taken by the user.
 
 
 \problemchapter{Progetto assegnato} %rob
@@ -132,12 +132,13 @@ Java, Android, OpenCV per Android o altri framework particolari di OCR disposnib
 \chapter{Introduzione}
 \section{Contesto del progetto}
     %dire che per la ditta è importante un concetto di intelligenza artificiale
-    La ditta committente DSwiss dispone di una applicazione sia client che mobile di gestione delle password. Nello stato attuale, queste password vengono salvate all'interno di un DB locale sempre a disposizione dell'utente.
+    La ditta committente DSwiss dispone di una applicazione sia pc client che mobile di gestione delle password. Nello stato attuale, queste password vengono salvate all'interno di un DB locale sempre a disposizione dell'utente.
     \Decaa
     Hanno pensato di aggiungere una nuova caratteristica, ovvero un sistema di ricerca automatica della password da inserire, tramite una fotografia della pagina di login.
-    Vorrebbero quindi applicare delle tecnologie ingegneristiche di computer vision per comprendere da una immagine appena scattata, il dominio della pagina web (sito) e recuperarne la password associata.
+    Vorrebbero quindi applicare delle tecnologie (computer vision) per comprendere da una immagine appena scattata, il dominio della pagina web (sito) e recuperarne la password associata.
     \Decaa
-    Ulteriormente all'incarico commissionato, la ditta in questione ha suscitato dell'interesse importante per il concetto di intelligenza artificiale. Andremo quindi ad eseguire una analisi esplorativa dei concetti base di machine learning in ambito PC e mobile.
+    In un secondo momento, dopo lo svolgimento dell'obbiettivo prefissato,
+    la ditta in questione ha suscitato dell'interesse importante per il concetto di intelligenza artificiale. Come obbiettivo aggiuntivo, siamo andati quindi ad eseguire una analisi esplorativa dei concetti base di machine learning in ambito PC e mobile.
     
 \section{Evoluzione e adattamento degli obbiettivi}
 \subsection{Preambolo}
@@ -149,15 +150,17 @@ Durante l’assegnazione dei lavori di semestre, per questo progetto erano stati
 \item Riconoscere uno schermo
 \item Estrarre i caratteri visualizzati sullo schermo
 \item Isolare URL da indirizzi o codici esposti in zona precisa schermo
+
 \end{itemize}
 
 Durante un primo incontro con il committente, abbiamo scoperto che questi obbiettivi non erano confacenti alla effettiva richiesta esposta dalla ditta. Abbiamo pertanto stilato, con l’aiuto del relatore e del committente, una nuova lista degli obbiettivi.
 
 % METTERE GLI OBBIETTIVI NUOVI IN MANIERA POLITICALLY CORRECT
 \begin{itemize}
-\item Sviluppare un concetto di libreria per android
+\item Sviluppare un concetto di libreria per pc e android
 \item Riconoscere uno schermo
 \item Ritornare il dominio di un sito data una fotografia
+\item Tutto quanto è da implementare in un contesto locale, senza l'ausilio di servizi in cloud o di un qualsiasi tipo di dispositivo in rete.
 \end{itemize}
 
 \chapter{Requisiti e specifiche} 
@@ -184,7 +187,7 @@ Gli algoritmi più conosciuti sono:
 La libreria più utilizzata in questo ambito è OpenCV. È una libreria sotto 3-clause BSD License. Esiste il supporto per Python, Java e C++ e anche qualche binding di terze parti. Contiene delle implementazioni ottimizzate per la maggior parte dei comuni algoritmi e tecniche utilizzate in computer vision.
 L'algoritmo che abbiamo potuto testare più performante è senz'altro il SURF. Purtroppo è un algoritmo patentato e l'utilizzo ne richiede quindi una licenza apposita. Nei nostri progetti di test mobile abbiamo utilizzato il KAZE che richiede un po' più di tempo.
 \subsubsection{Feature detection su smartphone}%rob
-La libreria OpenCV ha un porting per Android e anche per IOS. Per lo sviluppo con strumenti pensati per il multiplatform, come Xamarin, esistono delle librerie di terza parti. La ditta DSwiss utilizza come strumento di sviluppo proprio Xamarin, per questo motivo abbiamo cercato librerie disponibili in quest'ambito. Abbiamo scoperto Accord.NET, che in teoria offre funzionalità di Machine Learning, di image processing, di computer vision e molto altro. Ha una versione leggera pensata per i dispositivi mobili. Altro punto positivo è la licenza: GNU Lesser Public License v2.1. Purtroppo, abbiamo provato a utilizzarla senza successo, dato che gli sviluppatori sono ancora ad una versione alpha e il build non funziona in determinate condizioni. Per questo motivo nella nostra libreria abbiamo utilizzato EMGU.CV. È un wrapper .NET di OpenCV. Dispone di due modelli di licenza, una open source (GNU GPL license v3) o commerciale. Alcune funzionalità sono disponibili solo utilizzando la licenza commerciale. A scopo di test e didattico abbiamo chiesto e ricevuto una versione di prova della libreria completa. 
+La libreria OpenCV ha un porting per Android e anche per IOS. Per lo sviluppo con strumenti pensati per il multiplatform, come Xamarin, esistono delle librerie di terze parti. La ditta DSwiss utilizza come strumento di sviluppo proprio Xamarin, per questo motivo abbiamo cercato librerie disponibili in quest'ambito. Abbiamo scoperto Accord.NET, che in teoria offre funzionalità di Machine Learning, di image processing, di computer vision e molto altro. Ha una versione leggera pensata per i dispositivi mobili. Altro punto positivo è la licenza: GNU Lesser Public License v2.1. Purtroppo, abbiamo provato a utilizzarla senza successo, dato che gli sviluppatori sono ancora ad una versione alpha e il build non funziona in determinate condizioni. Per questo motivo nella nostra libreria abbiamo utilizzato EMGU.CV. È un wrapper .NET di OpenCV. Dispone di due modelli di licenza, una open source (GNU GPL license v3) o commerciale. Alcune funzionalità sono disponibili solo utilizzando la licenza commerciale. A scopo di test e didattico abbiamo chiesto e ricevuto una versione di prova della libreria completa. 
 \subsection{Machine learning}%rob
 \begin{quote}
     «Si dice che un programma apprende dall’esperienza E con riferimento a alcune classi di compiti T e con misurazione della performance P, se le sue performance nel compito T, come misurato da P, migliorano con l’esperienza E».
@@ -233,7 +236,11 @@ print("All done")
 Dopo ulteriori ricerche tuttavia abbiamo recuperato un modello pre-addestrato per il riconoscimento immagini tra cui l'etichetta monitor o screen è presente nei nodi di output. Si chiama MobileNet ed è opensource. Si possono trovare differenti modelli (basati sullo stesso dataset ma addestrati in modo diverso) che differiscono per prestazioni, dimensioni e precisione.
 
 \section{studio delle soluzioni - obiettivi iniziali}
-Tenendo in considerazione gli obbiettivi iniziali di questo progetto,
+Tenendo in considerazione gli obbiettivi iniziali di questo progetto, siamo andati a cercare una possibile soluzione per la richiesta commissionata.
+\Decaa
+L'obbiettivo principale di questa richiesta è quello di ricavare una associazione tra: foto appena scattata di una schermata di login -> corrispettiva informazione (nome dominio pagina web)
+\Decaa
+Già da un primo momento, ci siamo resi conto che l'utilizzo di un semplice meccanismo di OCR (optical character recognition) sull'url non sarebbe stata una soluzione possibile. Infatti per funzionare, la foto presa deve essere più che perfett
 \subsection{Decisione soluzione}
 \section{studio delle soluzioni - obiettivi aggiuntivi}
 \subsection{Decisione soluzione }
@@ -243,6 +250,8 @@ Tenendo in considerazione gli obbiettivi iniziali di questo progetto,
 \section{design soluzione obbiettivi aggiuntivi}
 
 \chapter{implementazione soluzioni}%rob
+Per facilitare la comprensione degli elementi del progetto (Computer Vision, Machine Learning, ecc...) abbiamo deciso di sviluppare la le funzionalità della libreria per desktop, in quanto erano per noi più facilmente testabili. In un secondo momento abbiamo programmato un'applicazione Demo per dimostrare la portatilità della libreria.
+
 \section{implementazione obbiettivi iniziali}%rob
 Per lo sviluppo della nostra soluzione abbiamo pensato di creare un oggetto semplice, che abbiamo chiamato Record. L'idea è che questo oggetto contenga le informazioni ricavate da un esecuzione di un algoritmo di feature detection in modo che il processo di confronto con altre immagini non richieda troppe risorse. 
 
@@ -378,9 +387,110 @@ Il metodo invece si presenta così:
 \end{lstlisting}
 Per il confronto delle feature delle immagini esistono sono diverse possibilità. La prima soluzione è la più semplice ma naturalmente la meno efficace, si utilizza un Brute-Force Matcher. Prende in esame un descrittore di una feature della prima immagine e la confronta con il descrittore di ogni feature rilevata nella seconda. Calcola quindi una distanza utilizzando una determinata funzione e ritorna quella più vicina. Nella nostra libreria però noi abbiamo usato il FLANN Based Matcher. FLANN, acronimo di Fast Library for Approximate Nearest Neighbour, è una libreria contenente algoritmi di ricerca ottimizzati di nearest neighbour. In OpenCV, l'oggetto Flann Matcher riceve in ingresso due parametri, index\_params e search\_params. Il primo indica l'algoritmo da utilizzare e ne sono disponibili diversi, ognuno con le sue particolarità. La scelta dipende da quante risorse e quanto tempo si vuole dedicare a questa operazione. Il secondo parametro indica quante volte devono essere attraversati gli alberi nell'indice. Più volte significa più precisione ma naturalmente anche più tempo di elaborazione. 
 
-
 \subsection{test e risultati}%rob
+Durante lo sviluppo abbiamo utilizzato la libreria fornita da Microsoft per i test d'unità. Per tutti i componenti sono stati sviluppati i test a livello desktop. Dato i tempi limitati i test per le piattaforme mobile non sono stati eseguiti. 
 
+Di seguito un esmpio di test d'unità della classe Record:
+
+\begin{lstlisting}
+  [TestClass]
+    public class RecordTest
+    {
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void createFromNotFoundTest() {
+            Record emptyRecord = Record.CreateFromImage("Resources/notFoundImage.png","notFoundImage"); 
+        }
+
+        [TestMethod]
+        public void createFromImageTest(){
+            Record record = Record.CreateFromImage("Resources/testImage1.png", "testImage1");
+            Assert.IsNotNull(record);
+        }
+    }
+\end{lstlisting}
+
+I test per la libreria invece sono strutturati in questo modo:
+
+\begin{lstlisting}
+  using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using RecoLibrary;
+using System.Collections.Generic;
+
+namespace RecoTest
+{
+    [TestClass]
+    public class RecoTest
+    {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            Reco.GetInstance().purgeRecoInstance();
+        }
+
+        [TestMethod]
+        public void AddImageAndSaveTest()
+        {
+            Assert.IsFalse(Reco.GetInstance().AddImage("notFound.png", "notFoundImage"));
+            Assert.IsTrue(Reco.GetInstance().AddImage("Resources/testImage1.png", "testImage1"));
+            Reco.GetInstance().AddImage("Resources/testImage2.png", "testImage2");
+            Reco.GetInstance().AddImage("Resources/testImage3.png", "testImage3");
+            Reco.GetInstance().AddImage("Resources/testImage4.png", "testImage4");
+            Assert.AreEqual(4, Reco.GetInstance().GetNumberOfRecords());
+            Assert.IsTrue(Reco.GetInstance().Save("Resources/sampleRepository.bin"));
+        }
+        [TestMethod]
+        public void GetInstanceAndLoadTest()
+        {
+            //Check consistency of Reco instance and records field without input file
+            Assert.IsNotNull(Reco.GetInstance());
+            Assert.AreEqual(0,Reco.GetInstance().GetNumberOfRecords());
+
+            //load a repository.bin test file
+            Assert.IsTrue(Reco.GetInstance().Load("Resources/sampleRepository.bin"));
+
+            //Check consistency of Reco instance and records field with input test file
+            Assert.AreEqual(4, Reco.GetInstance().GetNumberOfRecords());
+
+        }
+
+        [TestMethod]
+        public void GetNameTest()
+        {
+           Reco.GetInstance().Load("Resources/sampleRepository.bin");
+           string name=Reco.GetInstance().GetName("Resources/imageToFind.jpeg");
+           Assert.AreEqual(name, "testImage1");
+        }
+
+        [TestMethod]
+        public void GetNNameTest()
+        {
+            Reco.GetInstance().Load("Resources/sampleRepository.bin");
+            List<string> names = Reco.GetInstance().GetNNames("Resources/imageToFind.jpeg",2);
+            Assert.AreEqual(names[0], "testImage1");
+            Assert.AreEqual(names[1], "testImage2");
+        }
+
+        [TestMethod]
+        public void RemoveTest()
+        {
+            Reco.GetInstance().Load("Resources/sampleRepository.bin");
+            Assert.IsTrue(Reco.GetInstance().RemoveImage("testImage1"));
+        }
+
+        [TestMethod]
+        public void IsMonitorTest()
+        {
+            Assert.IsTrue(Reco.GetInstance().isMonitor("Resources/monitor.jpg"));
+            Assert.IsFalse(Reco.GetInstance().isMonitor("Resources/random.jpg"));
+        }
+    }
+}
+\end{lstlisting}
+
+Prima di ogni test è eseguito il metodo annotato con "TestInitialize" che 
 
 \section{implementazione obbiettivi aggiuntivi}%rob
 \subsection{test e risultati}%rob
