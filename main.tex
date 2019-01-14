@@ -2,6 +2,9 @@
 \documentclass[twoside]{supsistudent} 
 
 \usepackage{listings}
+\usepackage{pdflscape}
+\usepackage{hyperref}
+\usepackage[export]{adjustbox}
 % per settare noindent
 \setlength{\parindent}{0pt}
 
@@ -105,7 +108,7 @@ The second part of this research is an exploratory analysis of the technologies 
 
 \problemchapter{Progetto assegnato} %rob
 \problemsection{Descrizione}
-Scopo del progetto è quello di rilevare tramite smartphone indirizzi (URL) o codici particolari testuali (per esempio password) visualizzati su uno schermo, per esempio di un PC.
+Lo scopo del progetto è quello di rilevare tramite smartphone indirizzi (URL) o codici particolari testuali (per esempio password) visualizzati su uno schermo, per esempio di un PC.
 
 Si tratta quindi di realizzare un programma per smartphone Android che tramite funzioni di Computer Vision sia in grado di riconoscere dei caratteri (OCR) in determinate zone dello schermo.
 
@@ -157,14 +160,22 @@ Durante un primo incontro con il committente, abbiamo scoperto che questi obbiet
 
 % METTERE GLI OBBIETTIVI NUOVI IN MANIERA POLITICALLY CORRECT
 \begin{itemize}
-\item Sviluppare un concetto di libreria per pc e android
-\item Riconoscere uno schermo
-\item Ritornare il dominio di un sito data una fotografia
+\item Ritornare un'informazione associata data una fotografia, (come il nome del sito)
+\item Sviluppare una libreria per pc e/o android
 \item Tutto quanto è da implementare in un contesto locale, senza l'ausilio di servizi in cloud o di un qualsiasi tipo di dispositivo in rete.
 \end{itemize}
 
+\subsection{Obbiettivi aggiuntivi alla richiesta iniziale}
+Dato che il raggiungimento dell'obbiettivo di recuperare il nome del sito da una foto scattata con il telefono è stato eseguito con buone tempistiche (lato desktop), il committente ha mostrato il suo interesse nell'approfondire altre tematiche, in particolare machine learning in ambito mobile.
+\Decaa
+È stato quindi deciso di approfondire questa tematica, tramite una analisi esplorativa con uno studio di fattibilità in ambito di machine learning su smartphone (computazione locale) senza ausilio di servizi esterni, come server remoti o servizi online. 
+\Decaa
+Pertanto l'obbiettivo aggiuntivo è quello di implementare una piccola funzionalità che sfrutti le tecnologie di machine learning all'interno della nostra libreria.
+
 \chapter{Requisiti e specifiche} 
-Il requisito più importante e limitante a livello di programmazione è quello che tutta la libreria deve utilizzare solo ed unicamente le risorse locali dei dispositivi mobile, per questioni di sicurezza. Questo significa che i servizi come le API Vision di Google, le API Computer Vision di Azure della Microsoft o Amazon Rekognition di Amazon, non sono utilizzabili.  
+Il requisito più importante e limitante a livello di programmazione è quello che tutta la libreria deve utilizzare solo ed unicamente le risorse locali dei dispositivi mobile, per questioni di sicurezza. Questo significa che i servizi come le API Vision di Google \cite{googleVision}, le API Computer Vision di Azure della Microsoft \cite{microsoftAzure}o Amazon Rekognition di Amazon \cite{amazonReko}, non sono utilizzabili. 
+\Decaa
+La ditta DSwiss utilizza Xamarin come soluzione per lo sviluppo della loro applicazione. Per questo motivo la libreria sarà implementata e testata utilizzando lo stesso strumento.
 
 \chapter{Fase analitica}
 \section{Stato dell'arte} %rob
@@ -175,8 +186,8 @@ Quando giochiamo con i puzzle, il nostro cervello esegue due operazioni signific
 \item Regioni
 \item Creste
 \end{itemize}
-Una volta trovati questi punti bisogna anche trovare il modo più efficiente per descriverli. Per questo esistono altri tipi di algoritmi chiamati "algoritmi di feature description"
-Una volta ottenute i punti d'interesse e la loro descrizione si possono cercare le stesse feature in altre immagini e quindi determinare la presenza di corrispondenze. 
+Una volta trovati questi punti bisogna anche trovare il modo più efficiente per descriverli. Per questo motivo esistono altri tipi di algoritmi chiamati "algoritmi di feature description".
+Una volta ottenute i punti d'interesse e la loro descrizione, si possono cercare le stesse feature in altre immagini e quindi determinare la presenza di corrispondenze. 
 Gli algoritmi più conosciuti sono:
 \begin{itemize}
 \item SIFT
@@ -184,33 +195,32 @@ Gli algoritmi più conosciuti sono:
 \item BRIEF
 \item KAZE
 \end{itemize}
-La libreria più utilizzata in questo ambito è OpenCV. È una libreria sotto 3-clause BSD License. Esiste il supporto per Python, Java e C++ e anche qualche binding di terze parti. Contiene delle implementazioni ottimizzate per la maggior parte dei comuni algoritmi e tecniche utilizzate in computer vision.
-L'algoritmo che abbiamo potuto testare più performante è senz'altro il SURF. Purtroppo è un algoritmo patentato e l'utilizzo ne richiede quindi una licenza apposita. Nei nostri progetti di test mobile abbiamo utilizzato il KAZE che richiede un po' più di tempo.
+La libreria più utilizzata in questo ambito è OpenCV \cite{openCv}. È una libreria sotto 3-clause BSD License. Esiste il supporto per Python, Java e C++ e anche qualche binding di terze parti. Contiene delle implementazioni ottimizzate per la maggior parte dei comuni algoritmi e tecniche utilizzate in computer vision.
+L'algoritmo che abbiamo potuto testare più performante è senz'altro il SURF\cite{surf}. Purtroppo è un algoritmo patentato e l'utilizzo ne richiede quindi una licenza apposita. Nei nostri progetti di test mobile abbiamo utilizzato il KAZE\cite{kaze} che richiede un po' più di tempo.
 \subsubsection{Feature detection su smartphone}%rob
-La libreria OpenCV ha un porting per Android e anche per IOS. Per lo sviluppo con strumenti pensati per il multiplatform, come Xamarin, esistono delle librerie di terze parti. La ditta DSwiss utilizza come strumento di sviluppo proprio Xamarin, per questo motivo abbiamo cercato librerie disponibili in quest'ambito. Abbiamo scoperto Accord.NET, che in teoria offre funzionalità di Machine Learning, di image processing, di computer vision e molto altro. Ha una versione leggera pensata per i dispositivi mobili. Altro punto positivo è la licenza: GNU Lesser Public License v2.1. Purtroppo, abbiamo provato a utilizzarla senza successo, dato che gli sviluppatori sono ancora ad una versione alpha e il build non funziona in determinate condizioni. Per questo motivo nella nostra libreria abbiamo utilizzato EMGU.CV. È un wrapper .NET di OpenCV. Dispone di due modelli di licenza, una open source (GNU GPL license v3) o commerciale. Alcune funzionalità sono disponibili solo utilizzando la licenza commerciale. A scopo di test e didattico abbiamo chiesto e ricevuto una versione di prova della libreria completa. 
+La libreria OpenCV ha un porting per Android e anche per IOS. Per lo sviluppo con strumenti pensati per il multiplatform, come Xamarin\cite{xamarin}, esistono delle librerie di terze parti. La ditta DSwiss utilizza come strumento di sviluppo proprio Xamarin, per questo motivo abbiamo cercato librerie disponibili in quest'ambito. Abbiamo scoperto Accord.NET\cite{accordNet}, che in teoria offre funzionalità di Machine Learning, di image processing, di computer vision e molto altro. Ha una versione leggera pensata per i dispositivi mobili. Altro punto positivo è la licenza: GNU Lesser Public License v2.1. Purtroppo, abbiamo provato a utilizzarla senza successo, dato che gli sviluppatori sono ancora ad una versione alpha e il build non funziona in determinate condizioni. Per questo motivo nella nostra libreria abbiamo utilizzato EMGU.CV\cite{emguCv}. È un wrapper .NET di OpenCV. Dispone di due modelli di licenza, una open source (GNU GPL license v3) o commerciale. Alcune funzionalità sono disponibili solo utilizzando la licenza commerciale. A scopo di test e didattico abbiamo chiesto e ricevuto una versione di prova della libreria completa. 
 \subsection{Machine learning}%rob
 \begin{quote}
-    «Si dice che un programma apprende dall’esperienza E con riferimento a alcune classi di compiti T e con misurazione della performance P, se le sue performance nel compito T, come misurato da P, migliorano con l’esperienza E».
+    «Si dice che un programma apprende dall’esperienza \textbf{E} con riferimento a alcune classi di compiti \textbf{T} e con misurazione della performance \textbf{P}, se le sue performance nel compito \textbf{T}, come misurato da \textbf{P}, migliorano con l’esperienza \textbf{E}».
 \end{quote}
-    In pratica le tecniche di Machine Learning permettono ai computer di imparare dall'esperienza. ML si può suddividere in tre principali categorie: l'apprendimento supervisionato, l'apprendimento non supervisionato e l'apprendimento per rinforzo. La scelta del tipo di apprendimento da utilizzare dipende naturalmente dal problema da risolvere e dalla capacità computazionale del dispositivo che utilizzeremo. 
-    L'apprendimento supervisionato consiste nel fornire ad un sistema un dataset di informazioni in input e il releativo risultato. Per affrontare il suo compito il computer analizza il dataset e cerca di trovare delle regole in base a quanto già visto. La risposta che fornirà sarà quella più probabile secondo le sue esperienze, quindi secondo i dati passati in ingresso. 
-    L'addestramento non supervisionato differisce da quello supervisionato perché le informazioni che inseriamo all'inizio non sono classificate, i risultati non esistono. Il computer stesso deve definire le caratteristiche di una classe. Viene utilizzato in problemi di clustering, cioè il raggruppare in diversi insieme determinati elementi.
+    In pratica le tecniche di Machine Learning (ML) permettono ai computer di imparare dall'esperienza. ML si può suddividere in tre principali categorie: l'apprendimento supervisionato, l'apprendimento non supervisionato e l'apprendimento per rinforzo. La scelta del tipo di apprendimento da utilizzare dipende naturalmente dal problema da risolvere e dalla capacità computazionale del dispositivo che utilizzeremo.
+    L'apprendimento supervisionato consiste nel fornire ad un sistema un dataset (raccolta di dati strutturata) di informazioni in input e il releativo risultato. Per affrontare il suo compito il computer analizza il dataset e cerca di trovare delle regole in base a quanto già visto. La risposta che fornirà sarà quella più probabile secondo le sue esperienze, quindi secondo i dati passati in ingresso. 
+    L'addestramento non supervisionato differisce da quello supervisionato perché le informazioni che inseriamo all'inizio non sono classificate, i risultati non esistono. Il computer stesso deve definire le caratteristiche di una classe. Viene utilizzato in problemi di clustering, cioè il raggruppare in diversi insiemi determinati elementi.
     L'apprendimento per rinforzo è utilizzato in ambienti dinamici dove il computer deve raggiungere un obbiettivo. Si utilizza un sistema di ricompense e penalità. L'esempio più comune è l'utilizzo nelle auto senza pilota. 
     
     \subsubsection{Deep learning e Neural network}
-    Nella nostra libreria utilizzeremo il deep learning per renderla più robusta e per determinare se ci sono e quali loghi in una determinata immagine. Il deep learning è una sotto categoria del machine learning ed consiste nel produrre modelli di apprendimento su più livelli. 
-    In generale impara nuove nozioni da ciò che impara nei livelli precedenti. Pensate ad un'immagine di un gatto. Dopo una prima analisi dell'immagine determina che ci sono, occhi, baffi, pelo, ecc... Al prossimo livello grazie alle informazioni raccolte in precedenza capisce che si tratta di un gatto. Potremmo anche aggiungere un ulteriore livello e capire di quale razza si tratta. Il deep learning ha fatto grandi passi negli ultimi anni grazie anche alla reperibilità sempre maggiore di dataset di ogni tipo. Al centro del deep learning si trovano le neural network. 
-    Le reti neurali sono principalmente dei modelli matematici, che permettono di produrre una risposta in uscita dato un determinato input.
+    Nella nostra libreria utilizzeremo il deep learning per renderla più robusta e per determinare se ci sono e quali loghi in una determinata immagine. Il deep learning è una sotto categoria del machine learning e consiste nel produrre modelli di apprendimento su più livelli. 
+    In generale, apprende nuove nozioni da ciò che impara nei livelli precedenti. Pensate ad un'immagine di un gatto. Dopo una prima analisi dell'immagine determina che ci sono, occhi, baffi, pelo, ecc... Al prossimo livello, grazie alle informazioni raccolte in precedenza capisce che si tratta di un gatto. Potremmo anche aggiungere un ulteriore livello di consapevolezza e capire di quale razza si tratta. Il deep learning come tale, ha fatto grandi passi negli ultimi anni, grazie anche alla reperibilità sempre maggiore di dataset di ogni tipo. Al centro del deep learning si trovano le neural network. Le reti neurali sono principalmente dei modelli matematici, che permettono di produrre una risposta in uscita dato un determinato input.
 Queste tipologie di modelli matematici sono composti da livelli di "neuroni" stratificati, ovvero dei componenti procedurali (di calcolo o statistica) che simulano lo stesso funzionamento di un neurone (nodo) e le relative sinapsi (collegamento tra nodi). Questi strati si suddividono in strati di input, strati nascosti e strato finale, come da immagine.
 
 \includegraphics[width=\textwidth]{Pictures/neural_net.jpeg}
 
 \subsubsection{Machine learning su smartphone}%rob
-L'utilizzo del Machine Learning sui dispositivi mobili non è complicato. La parte che richiede più risorse computazionali infatti è la fase di training di un modello. Una volta ottenuto questo modello possiamo caricarlo nella nostra applicazione e utilizzarlo. I framework a disposizione sono molti, ma abbiamo avuto modo di testarne qualcuno come "ML .NET" che però sono risultati ancora non utilizzabili in termini di preparazione dell'ambiente di sviluppo e in termini di prestazioni. Tuttavia sono in fase di forte sviluppo, quindi ci aspettiamo un netto miglioramento di questo framework durante i prossimi mesi. Per la nostra libreria e i nostri test abbiamo provato quindi a utilizzare Tensorflow. Il test è avvenuto con successo sulla versione desktop mentre i binding della libreria presenti in Xamarin non funzionavano. Tensorflow però sta sviluppando un'alternativa per i dispositivi mobile chiamata Tensorflow Lite. Non abbiamo avuto modo di testarlo ma quello che abbiamo capito è che è meglio scrivere codice nativo senza passare da soluzioni multipiattaforma. Librerie cross-platfrom per Machine Learning e Computer Vision sono ancora troppo acerbe. 
+L'utilizzo del Machine Learning sui dispositivi mobili non è complicato. La parte che richiede più risorse computazionali infatti è la fase di training di un modello. Una volta ottenuto questo modello possiamo caricarlo nella nostra applicazione e utilizzarlo. I framework a disposizione sono molti, ma abbiamo avuto modo di testarne qualcuno come "ML .NET"\cite{mlNet} che però sono risultati ancora non utilizzabili in termini di preparazione dell'ambiente di sviluppo e in termini di prestazioni. Tuttavia sono in fase di forte sviluppo, quindi ci aspettiamo un netto miglioramento di questo framework durante i prossimi mesi. Per la nostra libreria e i nostri test, abbiamo provato quindi a utilizzare Tensorflow\cite{tensorFlow}. Il test è avvenuto con successo sulla versione desktop mentre i binding della libreria presenti in Xamarin non funzionavano. Tensorflow però sta sviluppando un'alternativa per i dispositivi mobile chiamata Tensorflow Lite. Non abbiamo avuto modo di testarlo, ma quello che abbiamo capito è che è meglio scrivere codice nativo senza passare da soluzioni multipiattaforma. Librerie cross-platfrom per Machine Learning e Computer Vision sono ancora in uno stato troppo acerbo. 
 
 \subsubsection{Dataset e modelli}%rob
-Per il nostro progetto e per poter testare gli strumenti in ambito di Machine Learning abbiamo cercato di risolvere un problema di image recognition. Vogliamo verificare che in un'immagine sia presente o meno un monitor, uno schermo. Il primo passo per affrontare questo problema è trovare tante foto di monitor o schermi. In un primo momento abbiamo quindi optato per riaddestrare l'ultimo layer di una neural network già pronta. 
-Per trovare molte immagini di monitor abbiamo utilizzato uno script python di un progetto git pubblico (vedi https://github.com/hardikvasa/google-images-download). Grazie a questo script si può eseguire il download di tot immagini da una ricerca in Google Immagini, specificandone anche il formato, la dimensione, ecc... Dopo aver scaricato le immagini le abbiamo processate per ridimensionarle tutte a 224x224 pixel. Questo perché addestrare l'ultimo layer di una neural network con immagini di dimensioni maggiori richiede più risorse e quindi di più tempo. Lo script è molto semplice:
+Per il nostro progetto e per poter testare gli strumenti in ambito di Machine Learning, abbiamo cercato di risolvere un problema di image recognition. Vogliamo verificare che in un'immagine sia presente o meno un monitor, uno schermo. Il primo passo per affrontare questo problema è trovare tante foto di monitor o schermi. In un primo momento abbiamo quindi optato per riaddestrare l'ultimo layer di una neural network già pronta. 
+Per trovare molte immagini di monitor abbiamo utilizzato uno script python di un progetto git pubblico\cite{googleDown} "google-images-download". Grazie a questo script si può eseguire il download di tot immagini da una ricerca in Google Immagini, specificandone anche il formato, la dimensione, ecc... Dopo aver scaricato le immagini le abbiamo processate per ridimensionarle tutte a 224x224 pixel. Questo perché addestrare l'ultimo layer di una neural network con immagini di dimensioni maggiori richiede più risorse e quindi di più tempo. Lo script è molto semplice:
 \begin{lstlisting}[language=Python]
 from PIL import Image
 import os
@@ -233,27 +243,249 @@ for file_name in os.listdir(directory):
 print("All done")
 \end{lstlisting}
 
-Dopo ulteriori ricerche tuttavia abbiamo recuperato un modello pre-addestrato per il riconoscimento immagini tra cui l'etichetta monitor o screen è presente nei nodi di output. Si chiama MobileNet ed è opensource. Si possono trovare differenti modelli (basati sullo stesso dataset ma addestrati in modo diverso) che differiscono per prestazioni, dimensioni e precisione.
+Tuttavia, dopo ulteriori ricerche, abbiamo recuperato un modello pre-addestrato per il riconoscimento di immagini tra cui l'etichetta monitor o screen è presente nei nodi di output. Si chiama MobileNet\cite{mobileNet} ed è opensource. Si possono trovare differenti modelli (basati sullo stesso dataset ma addestrati in modo diverso) che differiscono per prestazioni, dimensioni e precisione.
 
-\section{studio delle soluzioni - obiettivi iniziali}
+\section{Studio delle soluzioni - obiettivi iniziali}
 Tenendo in considerazione gli obbiettivi iniziali di questo progetto, siamo andati a cercare una possibile soluzione per la richiesta commissionata.
 \Decaa
-L'obbiettivo principale di questa richiesta è quello di ricavare una associazione tra: foto appena scattata di una schermata di login -> corrispettiva informazione (nome dominio pagina web)
+L'obbiettivo principale di questa richiesta è quello di ricavare una associazione tra: foto appena scattata di una schermata di login -> corrispettiva informazione (ad esempio il nome di dominio di una pagina web)
+Per risolvere questa richiesta, sono disponibili svariate soluzioni, con diverse tecnologie di appoggio, per esempio:
+\begin{itemize}
+\item Tecnologie di optical character recognition (OCR)
+\item Tecnologie di computer vision per feature detection e feature matching
+\end{itemize}
+È stato quindi necessario coinvolgere il committente per identificare su quale tecnologia erano interessati. Ci hanno indicato di analizzare delle possibili soluzioni basate su computer vision. In questo modo la libreria può funzionare anche con schermate di login che sfruttano servizi esterni di autenticazione (OAuth).
+
+\subsection{Accord.NET e Xamarin}
+\includegraphics[width=0.5\textwidth]{Pictures/accord_net.png}
+\newline
+Accord.NET è un framework in .NET per machine learning, data processing, Image processing, computer vision e molto altro. Dispone ulteriormente di un lightweight framework adattato per lo sviluppo su mobile.
 \Decaa
-Già da un primo momento, ci siamo resi conto che l'utilizzo di un semplice meccanismo di OCR (optical character recognition) sull'url non sarebbe stata una soluzione possibile. Infatti per funzionare, la foto presa deve essere più che perfett
+Distribuita sotto licenza GNU Lesser Public License v2.1
+\Decaa
+Purtroppo, durante una fase di test, abbiamo riscontrato parecchi problemi di integrazione. La causa è data dal fatto che questa libreria si trova in uno stato di test, in versione alpha e con delle problematiche di build in determinate condizioni.
+\Decaa
+Sebbene questo progetto sia in continua evoluzione, abbiamo deciso di scartarlo.
+
+\subsection{ML.NET e Xamarin}
+ML.NET è un framework per machine learning fornito da Microsoft, open source e multipiattaforma.
+Fornisce delle automazioni per la gestione dei dataset (raccolta di dati) ed il successivo trattamento, come l'estrapolazione delle caratteristiche e la costruizione di classificatori.
+\Decaa
+Questa libreria sta puntando sulla produzione di codice utilizzabile su dispositivi mobili, con la possibilità di integrazione di altre librerie come "Tensorflow", "Accord.net" e altre. Per questo motivo ha suscitato il nostro interesse.
+\Decaa
+Con una successiva ricerca, abbiamo scoperto che ML.NET per ora non dispone delle caratteristiche necessarie per risolvere la richiesta commissionata. Infatti, non fornisce delle funzionalità per processo di immagine.
+\Decaa
+Abbiamo deciso di scartare anche questo framework.
+
+\subsection{EmguCV e Xamarin}
+\includegraphics[width=0.5\textwidth]{Pictures/emgu.jpeg}
+\newline
+Emgu è una libreria wrapper che permette di eseguire il framework opencv su .net facendo quindi da interfaccia logica di traduzione tra i due.
+\Decaa
+OpenCV è un framework molto conosciuto per il processo di immagini, infatti esso è supportato da una grande comunità di sviluppatori. Nell'ambito del nostro incarico da svolgere, OpenCV fornisce tutte le funzionalità necessarie per il processo di immagine.
+\Decaa
+A livello di costo, EmguCV dispone di due licenze:
+\begin{itemize}
+\item Licenza open source ma con libreria limitata (priva della versione mobile)
+\item licenza commerciale: 400 dollari per 1 licenza sviluppatore, 800 dollari fino a 25 sviluppatori
+\end{itemize}
+Per fini didattici, Emgu ci ha fornito una versione demo della libreria commerciale, comunque limitata ma con la possibilità di porting su mobile.
+
 \subsection{Decisione soluzione}
-\section{studio delle soluzioni - obiettivi aggiuntivi}
+Per lo svolgimento della richiesta iniziale, abbiamo deciso in collaborazione con il committente, di utilizzare la soluzione composta da EmguCV e Xamarin come ambiente di sviluppo. Determinante è stata la notorietà di OpenCV con le sue funzionalità conosciute ed il suo supporto dato dalla community.
+
+\section{Studio delle soluzioni - obiettivi aggiuntivi}
+Tenendo conto degli interessi suscitati dal committente, effettuiamo una ricerca sulle possibili soluzioni presenti attualmente nell'ambito di machine learning su dispositivi mobili.
+\Decaa
+Particolarmente importante il fatto che sia il codice che le funzionalità implementate dovranno essere disponibili e funzionanti \textbf{completamente in locale} pertanto senza l'ausilio di meccanismi, servizi o server remoti per la computazione.
+\Decaa
+Inoltre come ulteriore vincolo, la soluzione che andremo a scegliere dovrà essere sviluppata in C\# nell'ambiente di sviluppo Xamarin.
+
+\subsection{Tensorflow}
+\includegraphics[width=0.3\textwidth]{Pictures/Tensorflow_logo.png}
+\newline
+Tensorflow è una libreria open source nata per eseguire machine learning.
+Dispone di API native per svariati linguaggi di programmazione tra cui: python, C, C++, Java e GO. Purtroppo non dispone nativamente delle API per C\# ma esistono dei binding di terze parti per ovviare a questa lacuna.
+\Decaa
+In particolar modo, Tensorflow nella sua pagina web consiglia di utilizzare TensorFlowSharp\cite{tensorflowSharp}.
+\Decaa
+Il committente era già a conoscenza di questa soluzione, indicandoci il suo interesse per questa libreria.
+\Decaa
+Per quanto riguarda il lato mobile, Tensorflow sta spingendo su una iniziativa chiamata Tensorflow Lite, una versione alleggerita della libreria compilabile ed utilizzabile su android ed altri dispositivi.
+
+\subsection{Possibili implementazioni}
+Per introdurre del machine learning all'interno della nostra libreria, abbiamo deciso di utilizzare dei sistemi di classificazione per renderla più robusta.
+\Decaa
+In particolar modo, abbiamo pensato a delle possibili soluzioni che potrebbero essere risolte tramite dei classificatori, come per esempio:
+
+\begin{itemize}
+\item Nella foto scattata dal telefono è presente un monitor?
+\item Nel caso di più loghi all'interno di una pagina, quale è il più plausibile dominio da ritornare?
+\item Gestione dell'autenticazione OAuth\cite{oauth} (autenticazione tramite terze parti) escludendo i brand meno plausibili nella pagina.
+\item Esiste un pattern identificabile per una generica form di login?
+\end{itemize}
+
+Tenendo conto di queste varianti, andremo a comprendere e testare dove possibile i meccanismi di classificazione, machine learning ed apprendimento automatico. Questo potrebbe portarci a sviluppare determinati componenti sia puramente teorici che pratici.
+
 \subsection{Decisione soluzione }
+Per questa seconda parte aggiuntiva del progetto abbiamo deciso, in presenza del committente, di utilizzare il tempo disponibile per esplorare le tecnologie di machine learning. Utilizzeremo come libreria Tensorflow (con binding eventuali) in ambiente Xamarin, cercando di risolvere i seguenti punti:
+\begin{itemize}
+\item Rilevare la presenza di un monitor all'interno dell'immagine.
+\item Introdurre ed utilizzare dei classificatori.
+\item Studio/creazione di un classificatore personalizzato.
+\end{itemize}
 
-\chapter{design e concezione soluzioni}
-\section{design soluzione obbiettivi iniziali}
-\section{design soluzione obbiettivi aggiuntivi}
+\chapter{Design e concezione soluzioni}
+\section{Design soluzione obbiettivi iniziali}
+\subsection{Concetto di base}
+L'obbiettivo di base di questa libreria è quello di creare una relazione tra un'immagine di riferimento e una stringa, in modo che tutte le immagini simili a quella di base, ritornino la stringa associata.
+\Decaa
+Il generico flusso di azioni di questa prima parte è rappresentata dal grafico a seguire:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1\textwidth]{Pictures/base_idea_chart.png}
+\end{figure}
+\newline
+Come prima operazione, l'utente scatterà una foto del monitor tramite il telefono, questa nuova immagine verrà processata all'interno della nostra libreria.
+La libreria, con l'ausilio di una repository locale, elaborerà questa immagine con le informazioni fondamentali contenute nella repository, per produrre il risultato desiderato.
+\Decaa
+Andremo quindi a definire:
+\begin{itemize}
+\item Logica di elaborazione
+\item Struttura dei dati di appoggio
+\end{itemize}
 
-\chapter{implementazione soluzioni}%rob
-Per facilitare la comprensione degli elementi del progetto (Computer Vision, Machine Learning, ecc...) abbiamo deciso di sviluppare la le funzionalità della libreria per desktop, in quanto erano per noi più facilmente testabili. In un secondo momento abbiamo programmato un'applicazione Demo per dimostrare la portatilità della libreria.
 
-\section{implementazione obbiettivi iniziali}%rob
-Per lo sviluppo della nostra soluzione abbiamo pensato di creare un oggetto semplice, che abbiamo chiamato Record. L'idea è che questo oggetto contenga le informazioni ricavate da un esecuzione di un algoritmo di feature detection in modo che il processo di confronto con altre immagini non richieda troppe risorse. 
+\newpage
+\subsection{Qualità dell'immagine di partenza e considerazioni implementative}
+Prima di trarre qualsiasi decisione sulla logica da utilizzare, è necessario comprendere con quale tipologia di dati la nostra libreria andrà a lavorare. Partiamo con un esempio di una immagine del monitor presa da telefono:
+
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth]{Pictures/imageToFindTrim.png}
+\end{figure}
+\newline
+Già a colpo d'occhio si può osservare che da una distanza media di 40 cm, si cominciano a perdere parecchi dettagli. Infatti le scritte di testo sono difficilmente leggibili e l'URL della pagina quasi irriconoscibile.
+\Decaa
+In presenza di questi fattori, ci siamo resi conto che difficilmente saremmo riusciti ad identificare la pagina web tramite riconoscimento ottico dei caratteri. Forse avremmo qualche possibilità con il logo principale, ma assolutamente senza speranze con l'URL.
+\Decaa
+Abbiamo quindi deciso di optare per una soluzione alternativa, ovvero utilizzare delle tecnologie di computer vision. Nello specifico, utilizzeremo degli algoritmi di feature matching e feature detection. La principale motivazione di questa decisione risulta nel fatto che queste tecnologie sono più robuste, permettendo di ricavare informazioni importanti anche da immagini di questo genere.
+
+\subsection{Definizione logica di implementazione}
+\subsubsection{Visione di insieme - logica principale}
+A seguire uno schema rappresentativo della logica di implementazione:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1\textwidth]{Pictures/library_components.png}
+\end{figure}
+\newline
+A partire da una immagine come input, la libreria si occuperà dei seguenti passaggi:
+\begin{itemize}
+\item Pre-processamenti di immagine (se necessario)
+\item Estrapolazione delle caratteristiche dell'immagine
+\item Comparazione delle caratteristiche appena trovate, con la repository di caratteristiche locali nel telefono.
+\item Ritornare la stringa associata in caso di riscontro.
+\end{itemize}
+
+C'è da aggiungere che questa visione globale è valevole sia per modalità desktop, che per versione mobile.
+
+\newpage
+\subsubsection{Strutturazione dati}
+Per il corretto funzionamento della nostra libreria, è necessario l'ausilio di una struttura dati di appoggio, la così detta repository locale.
+\Decaa
+Questa repository locale, contiene un insieme di associazioni tra l'immagine fondamentale e la stringa di testo associata.
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth]{Pictures/img_fondamentale.png}
+\end{figure}
+\newline
+Questa soluzione però non è la più ottimale, infatti salvando unicamente l'immagine si presentano determinate problematiche:
+\begin{itemize}
+\item Dimensioni / spazio occupato: salvare ogni singola immagine occupa spazio.
+\item Rielaborazione dell'immagine salvata: la libreria per poter svolgere il suo lavoro è obbligata a riprocessare tutte le immagini nella repository.
+\item Mancanza delle informazioni fondamentali: in questo modo la repository non sarebbe altro che una raccolta di immagini, senza un valore aggiunto per la libreria
+\item Incremento costo computazionale libreria: salvando solo l'immagine, si delega la sua elaborazione nel momento di comparazione a runtime, aumentando drasticamente il tempo necessario per riceve una risposta.
+\end{itemize}
+Per ottimizzare quanto indicato sopra, abbiamo deciso di strutturare i dati, salvando unicamente le informazioni descrittive dell'immagine fondamentale.
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth]{Pictures/img_fondamentale_preproc.png}
+\end{figure}
+\newline
+
+\subsubsection{Algoritmica fondamentale scelta - KAZE e SURF}
+Per evadere la logica principale di questa prima parte della nostra libreria, andremo ad utilizzare degli algoritrmi di feature detection e feature matching.
+Questi algoritmi andranno ad estrapolare le informazioni inerenti alle immagini utilizzate, e successivamente tramite queste informazioni, identificare delle correlazioni tra le immagini.
+Esistono svariati algoritmi di questo tipo, siamo andati quindi ad analizzarne alcuni.
+\Decaa
+Gli algoritmi che abbiamo testato si chiamano "SURF" (Speeded-Up Robust Features) e "KAZE", ambedue offrono lo stesso risultato, tramite però delle procedure diverse. Per il fine di questo progetto, non siamo entrati troppo nel dettaglio nella comprensione del loro funzionamento (matematico e procedurale), ma bensì abbiamo eseguito delle comparazioni pratiche tra i due. Ulteriori approfondimenti in merito a queste tematiche possono essere trovati nella bibliografia.
+\Decaa
+Dalla nostra comparazione (sia teorica che empirica) abbiamo tratto le seguenti conclusioni:
+
+\begin{itemize}
+\item Velocità feature detection: il SURF è più veloce del KAZE
+\item Velocità feature matching: il KAZE è più veloce del SURF
+\item Precisione della soluzione: simili, dipende dalle immagini utilizzate.
+\end{itemize}
+
+All'interno della nostra libreria, l'esecuzione dell'operazione di feature detection viene svolta una sola volta, ovvero quando viene passata l'immagine presa dal telefono per essere elaborata. Una volta elaborata però, la nostra libreria esegue una fase di ricerca, utilizzando molteplici volte l'operazione di feature matching.
+\Decaa
+Abbiamo pertanto deciso di utilizzare principalmente l'algoritmo KAZE nella nostra release.
+
+\newpage
+\subsubsection{Flusso di lavoro implementativo}
+Il flusso di lavoro della nostra libreria si presenta in questo modo:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth]{Pictures/flusso1.png}
+\end{figure}
+\newline
+
+\section{Design soluzione obbiettivi aggiuntivi}
+\subsection{Introduzione elementi di machine learning}
+Nel flusso di lavoro implementativo [sezione 4.1.3.4] abbiamo già allocato una posizione logica per l'utilizzo del machine learning.
+\Decaa
+Nello specifico, abbiamo pensato di utilizzare delle metodologie di classificazione, per svolgere gli obbiettivi aggiuntivi prefissati.
+
+\subsection{Libreria di binding: TensorFlowSharp}
+Come prefissato negli obbiettivi aggiuntivi, siamo andati ad utilizzare TensorFlow per svolgere tutti gli aspetti legati alla tematica del machine learning. Purtroppo TensorFlow non dispone dei bindig ufficiali per il linguaggio di programmazione  C\#, siamo quindi andati ad utilizzare un binding non ufficiale, indicatoci direttamente nella pagina web di tensorflow.
+\Decaa
+Dopo alcune ulteriori ricerche, abbiamo scoperto che la libreria TensorFlowSharp non dispone dei binding per funzionare su mobile. Sarà quindi necessario identificare una soluzione alternativa, come per esempio tensorflow lite.
+
+\subsection{Rilevare la presenza di un monitor nell'immagine}
+\subsubsection{La computer vision da sola non è abbastanza...}
+Rilevare un determinato oggetto all'interno di una foto, risulta essere un problema complesso. Ancora più complesso utilizzando unicamente tecnologie di computer vision. Infatti, per risolvere questo problema con solo la computer vision, bisognerebbe svolgere svariate operazioni, come per esempio:
+\begin{itemize}
+\item Preparare in maniera corretta l'immagine, ridimensionandola e portandola ad una colorazione su scale di grigio;
+\item Tramite sistemi di sfocatura o ritocco di immagine, enfatizzare il più possibile i contorni all'interno della foto;
+\item Utilizzare degli algoritmi di rilevamento dei contorni per rilevare delle forme a partire dai bordi;
+\item Implementare una logica per "escludere" le forme che non sono rettangolari nella foto;
+\item Indovinare se uno o più di questi rettangoli sono dei monitor;
+\end{itemize}
+Come si può ben notare, i passaggi da eseguire sono molti, alcuni di essi complessi ed altri ancora sono poco definiti. Per questo motivo abbiamo deciso di risolvere il problema mediante machine learning.
+\subsubsection{Introduzione/utilizzo classificatori}
+Per identificare il monitor, andremo ad utilizzare un classificatore, ovvero un componente utilizzato nel machine learning per riconoscere o classificare un determinato oggetto, in una classe (tipo) conosciuta dal classificatore.
+\Decaa Per fare questo, abbiamo deciso di utilizzare un classificatore basato su una rete neurale convoluzionale. Questa rete neurale, che ricorda vagamente il funzionamento stesso del nostro cervello, data una immagine di input è in grado di classificarla in determinate classi (tipologie) a lei conosciuta.
+\Decaa
+Andremo quindi ad interagire con uni di questi classificatori, provando in un primo momento a modificarlo, tramite il train (allenamento) dell'ultimo layer, per vedere cosa ne esce. Successivamente proveremo ad integrare uno di questi classificatori all'interno della nostra libreria, così che possa, data l'immagine di input, determinare se nella foto è presente un monitor.
+\Decaa
+A livello didattico, sarà interessante comprendere come si introduce, modifica o utilizza un classificatore già addestrato e pronto all'uso, all'interno della nostra soluzione.
+
+\subsection{Studio/creazione di un classificatore personalizzato}
+Un'ulteriore valore aggiunto che può essere inserito all'interno della nostra libreria, potrebbe essere quello di rilevare la presenza di eventuali loghi di pagine web conosciute. Per fare questo, sarà necessario analizzare alcuni componenti fondamentali per la creazione di un classificatore, più nel dettaglio, di un classificatore basato su rete neurale.\Decaa
+Proveremo a creare, partendo da zero, tutto ciò che è necessario per sviluppare un classificatore personalizzato per rispondere alla nostra necessità. Sarà quindi necessario svolgere le seguenti operazioni:
+\begin{itemize}
+\item Trovare o costruire un dataset per l'apprendimento del nostro classificatore.
+\item Pulire i dati raccolti in modo che possano essere utilizzati correttamente
+\item Creare il classificatore, allenandolo con i dati raccolti
+\item Testarne la sua accuratezza
+\end{itemize}
+
+\chapter{Implementazione soluzioni}%rob
+Per facilitare la comprensione degli elementi del progetto (Computer Vision, Machine Learning, ecc...) abbiamo deciso in un primo momento di sviluppare le funzionalità della libreria per desktop, in quanto erano per noi più facili da testare. In un secondo momento, abbiamo programmato un'applicazione Demo per dimostrare la portabilità della libreria su dispositivi mobile.
+
+\section{Implementazione obbiettivi iniziali}%rob
+Per lo sviluppo della nostra soluzione, abbiamo pensato di creare un oggetto semplice, che abbiamo chiamato Record. L'idea  di base, è che questo oggetto contenga le informazioni ricavate da un esecuzione di un algoritmo di feature detection, in modo che il processo di confronto con altre immagini non richieda troppe risorse. 
 
 \begin{lstlisting}[language=C]
 
@@ -281,7 +513,7 @@ Per lo sviluppo della nostra soluzione abbiamo pensato di creare un oggetto semp
     ...
 \end{lstlisting}
 
-Questa classe espone un solo metodo:
+Questa classe espone un solo metodo, la creazione di un nuovo Record:
 
 \begin{lstlisting}[language=C]
 public static Record CreateFromImage(String path, String name) {
@@ -298,12 +530,12 @@ public static Record CreateFromImage(String path, String name) {
         }
 \end{lstlisting}
 
-Come mostrato sopra, il metodo restituisce un nuovo record. Al Record è collegato una stringa "name" che serve a recuperare il valore corrispondente dell'immagine (come facebook, netflix, o anche l'URL direttamente, dipenderà da come vorrà essere utilizzata la libreria). Prima di restituire l'oggetto viene eseguito il metodo di feature detection e salvati i relativi dati. Questo metodo è pensato per ampliare il database locale qualora i dati precaricati non siano sufficienti o quando l'utente deve riconoscere siti personalizzati. 
+Come mostrato sopra, il metodo restituisce un nuovo record. Al Record è collegato una stringa "name" che serve a recuperare il valore corrispondente dell'immagine (come facebook, netflix, o anche l'URL direttamente, dipenderà da come vorrà essere utilizzata la libreria). Prima di restituire l'oggetto, viene eseguito il metodo di feature detection e salvati i relativi dati. Questo metodo è pensato per ampliare il database locale qualora i dati precaricati non siano sufficienti o quando l'utente deve riconoscere siti personalizzati. 
 
 La libreria vera e propria è la classe Reco.cs. Espone poche API atte a risolvere il problema proposto, come ad esempio il metodo per il recupero del nome data un'immagine in input. 
 
-Attualmente date le tempistiche e lo scopo della libreria (conoscere quali strumenti si possono utilizzare per risolvere questo tipo di problemi) i Record sono serializzati e salvati localmente. Quando si utilizza la libreria si può richiamare un metodo load per caricare il file contenente i record in memoria. In futuro chiaramente si può migliorare questa gestione utilizzando ad esempio un componente come LINQ presente nel framework .NET.
-Sono presenti due funzione per aggiunta e rimozione di record:
+Attualmente date le tempistiche e lo scopo della libreria (conoscere quali strumenti si possono utilizzare per risolvere questo tipo di problemi) i Record sono serializzati e salvati localmente. Quando si utilizza la libreria si può richiamare un metodo load per caricare il file contenente i record in memoria. In futuro, chiaramente si può migliorare questa gestione utilizzando ad esempio un componente come LINQ presente nel framework .NET.
+Sono presenti due funzioni per l'aggiunta e rimozione di record:
 
 
 \begin{lstlisting}[language=C]
@@ -327,7 +559,7 @@ public bool AddImage(String imagePath, String name) {
         }
 \end{lstlisting}
 
-Abbiamo programmato un metodo chiamato GetNameList che, dato il percorso di un'immagine, genera un oggetto della classe Record, senza nessun nome associato, dopodichè utilizza le proprietà calcolate per generare un valore di score per ogni confronto. Sfruttando il metodo presente nella classe Utility, Sort List (che abbiamo implementato per ordinare la lista in base allo score di ogni confronto) restituisce una lista ordinata di coppie chiave-valore. La chiave è il nome registrato insieme al record mentre il valore rappresenta lo score risultante dalla comparazione. In questo modo si ottiene una lista di nomi per il quale il primo elemento è l'immagine con più punti in comune con quella in ingresso. 
+Abbiamo programmato un metodo chiamato GetNameList che, dato il percorso di un'immagine, genera un oggetto della classe Record, senza nessun nome associato, dopodichè utilizza le proprietà calcolate per generare un valore di score per ogni confronto. Sfruttando il metodo presente nella classe Utility, Sort List (che abbiamo implementato per ordinare la lista in base allo score di ogni confronto) restituisce una lista ordinata di coppie chiave-valore. La chiave è il nome registrato insieme al record, mentre il valore rappresenta lo score risultante dalla comparazione. In questo modo, si ottiene una lista di nomi per il quale il primo elemento è l'immagine con più punti in comune con quella in ingresso. 
 
 Il sort è effettuato in questo modo:
 
@@ -385,12 +617,13 @@ Il metodo invece si presenta così:
             return resultList;
         }
 \end{lstlisting}
-Per il confronto delle feature delle immagini esistono sono diverse possibilità. La prima soluzione è la più semplice ma naturalmente la meno efficace, si utilizza un Brute-Force Matcher. Prende in esame un descrittore di una feature della prima immagine e la confronta con il descrittore di ogni feature rilevata nella seconda. Calcola quindi una distanza utilizzando una determinata funzione e ritorna quella più vicina. Nella nostra libreria però noi abbiamo usato il FLANN Based Matcher. FLANN, acronimo di Fast Library for Approximate Nearest Neighbour, è una libreria contenente algoritmi di ricerca ottimizzati di nearest neighbour. In OpenCV, l'oggetto Flann Matcher riceve in ingresso due parametri, index\_params e search\_params. Il primo indica l'algoritmo da utilizzare e ne sono disponibili diversi, ognuno con le sue particolarità. La scelta dipende da quante risorse e quanto tempo si vuole dedicare a questa operazione. Il secondo parametro indica quante volte devono essere attraversati gli alberi nell'indice. Più volte significa più precisione ma naturalmente anche più tempo di elaborazione. 
+Per il confronto delle features delle immagini, esistono diverse possibilità. La prima soluzione è la più semplice ma naturalmente la meno efficace, si utilizza un Brute-Force Matcher. Prende in esame un descrittore di una feature della prima immagine e la confronta con il descrittore di ogni feature rilevata nella seconda. Calcola quindi una distanza utilizzando una determinata funzione e ritorna quella più vicina. Nella nostra libreria però noi abbiamo usato il FLANN Based Matcher. FLANN\cite{flann}, acronimo di Fast Library for Approximate Nearest Neighbour, è una libreria contenente algoritmi di ricerca ottimizzati di nearest neighbour. In OpenCV, l'oggetto Flann Matcher riceve in ingresso due parametri, index\_params e search\_params. Il primo indica l'algoritmo da utilizzare (ne sono disponibili diversi) ognuno con le sue particolarità. La scelta dipende da quante risorse e quanto tempo si vuole dedicare a questa operazione. Il secondo parametro indica quante volte devono essere attraversati gli alberi nell'indice. Più volte significa più precisione, ma naturalmente anche più tempo di elaborazione. 
 
-\subsection{test e risultati}%rob
+\subsection{Test e risultati}%rob
+\subsubsection{test di unità della libreria}
 Durante lo sviluppo abbiamo utilizzato la libreria fornita da Microsoft per i test d'unità. Per tutti i componenti sono stati sviluppati i test a livello desktop. Dato i tempi limitati i test per le piattaforme mobile non sono stati eseguiti. 
 
-Di seguito un esmpio di test d'unità della classe Record:
+Di seguito un esempio di test d'unità della classe Record:
 
 \begin{lstlisting}
   [TestClass]
@@ -414,7 +647,7 @@ Di seguito un esmpio di test d'unità della classe Record:
 I test per la libreria invece sono strutturati in questo modo:
 
 \begin{lstlisting}
-  using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using RecoLibrary;
 using System.Collections.Generic;
@@ -479,32 +712,172 @@ namespace RecoTest
             Reco.GetInstance().Load("Resources/sampleRepository.bin");
             Assert.IsTrue(Reco.GetInstance().RemoveImage("testImage1"));
         }
-
-        [TestMethod]
-        public void IsMonitorTest()
-        {
-            Assert.IsTrue(Reco.GetInstance().isMonitor("Resources/monitor.jpg"));
-            Assert.IsFalse(Reco.GetInstance().isMonitor("Resources/random.jpg"));
-        }
-    }
-}
+        ...
 \end{lstlisting}
 
-Prima di ogni test è eseguito il metodo annotato con "TestInitialize" che 
+Prima di ogni test è eseguito il metodo annotato con "TestInitialize" che esegue un purge dell'istanza contenente i Record salvati in precedenza. Gli altri metodi verificano invece l'aggiunta di immagini alla libreria, la rimozione di immagini, il recupero del nome data un'immagine in input e il recupero dei nomi dei record più probabili data un'immagine in input.
+\Decaa
+In termini di precisione la libreria funziona molto bene anche eseguendo la foto in un ambiente scuro, girando la fotocamera o da lontano. Le prestazioni invece dipendono maggiormente dagli algoritmi utilizzati. Il primo è quello di feature detection, a livello desktop abbiamo potuto testare il KAZE e il SURF. 
+L'algoritmo più veloce è quello migliore nell'ambito di matching (e non in fase di detection), KAZE. Nei test desktop con una lista di Record di una decina di immagini si riesce ad avere una risposta nell'ordine di 500-600 ms. Con quattro immagini il tempo arriva a circa 450-550ms. Il sistema quindi è abbastanza prestante ma la scalabilità non è garantita. Per migliorare i tempi di risposta bisogna conoscere meglio gli algoritmi di matching e capire quale sarebbe meglio in caso di database con un paio di centinaia di immagini.
 
-\section{implementazione obbiettivi aggiuntivi}%rob
-\subsection{test e risultati}%rob
+\subsubsection{Risultati ottenuti}
+Per testare i risultati ottenuti dalla nostra libreria, siamo andati ad eseguire alcune prove pratiche. Nello specifico, abbiamo utilizzato delle foto prese da telefono, per testare velocità e risultato di questa prima parte della libreria.\Decaa
+Per questioni di spazio e di completezza, andremo a sviluppare nel dettaglio un caso pratico, per tirare le somme generali di prestazione.Partendo da una stessa immagine, siamo andati a provare nella pratica i due algoritmi di feature matchine e feature detection presi in analisi: KAZE e SURF.
+\Decaa
+Partendo da una stessa immagine di input:
+\newline
+\begin{figure}[h!]
+  \centering
+    \includegraphics[height=0.3\textwidth]{Pictures/imageToFindTrim.png}
+\end{figure}
+\newline
+Iniziando con l'algoritmo KAZE, il risultato ottenuto è questo:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth]{Pictures/resultKAZE.jpeg}
+\end{figure}
+\newline
+Mentre che con l'algoritmo SURF si ottiene:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\textwidth]{Pictures/resultSURF.jpeg}
+\end{figure}
+\newline
+Come si può notare, ambedue hanno trovato una corrispondenza con l'immagine fondamentale di "Facebook", con però dei riscontri diversi.
+\Decaa
+Infatti, parlando proprio dei riscontri ottenuti, ecco i risultati dei test precedenti:
+\newline
+Matching score con KAZE:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1\textwidth]{Pictures/Matching_scores_KAZE.PNG}
+\end{figure}
+\newline
+Matching score con SURF:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1\textwidth]{Pictures/Matching_scores_SURF.PNG}
+\end{figure}
+\newline
+Come analizzato in precedenza, possiamo vedere che l'algoritmo KAZE ha trovato in generale un numero di riscontri più alto rispetto all'algoritmo SURF. Addirittura più di 800 riscontri sono stati trovati con la stessa immagine di input.\Decaa
+Parlando di tempistiche, dopo svariate prove abbiamo constatato che, il tempo di risposta della nostra libreria è di circa 500ms per 10 elementi della repository. Possiamo pertanto stimare una media di 50ms per ogni elemento da cercare. Purtroppo questa è puramente una stima analitica, infatti al crescere della repository, è possibile che i tempi di risposta aumentino. \Decaa
+Come prima versione di questa libreria, i tempi di risposta sono accettabili. Da notare che la libreria attualmente è unicamente in uno stato funzionale, c'è ancora molto margine di manovra per delle ottimizzazioni, sia per la gestione della memoria, sia per l'aumento delle prestazioni generali.
+
+\newpage
+\section{Implementazione obbiettivi aggiuntivi}%rob
+Per poter testare gli strumenti per l'utilizzo di Machine Learning, abbiamo implementato un semplice metodo che ritorna true se nell'immagine è presente un monitor (o uno schermo). Abbiamo usato Tensorflow per addestrare l'ultimo layer di una rete neurale già preaddestrata, dando in pasto al classificatore un centinaio di immagini contenenti monitor o schermi e altrettante senza monitor. Con così poche immagini di test il classificatore non funzionava correttamente. Restituiva infatti, come ci si può aspettare, che il monitor non era presente. Il dato che però tornava utile era la percentuale di confidenza della risposta. Infatti se il monitor era presente, la confidenza passava da un 99\% a un 94\%. 
+Abbiamo trovato in rete però un modello già addestrato che tra i nodi di output presenta la label "monitor", perfetto per i nostri test. Il modello si chiama MobileNetV2 ed ha un'architettura ottimizzata per i dispositivi mobili. Di seguito è mostrato un grafico che mette a confronto diverse reti neurali esistenti.
+\Decaa
+\includegraphics[width=\textwidth]{Pictures/accuracy.PNG}
+\Decaa
+I file da caricare nell'applicazione sono quindi solamente due: il modello, e la lista delle label. 
+
+\begin{lstlisting}
+        public Boolean isMonitor(String imagePath) {
+            var graph = new TFGraph();
+            // Load the serialized GraphDef from a file.
+            var model = File.ReadAllBytes(modelFile);
+
+            graph.Import(model, "");
+
+            var tensor = ImageUtil.CreateTensorFromImageFile(imagePath, TFDataType.Float);
+            var session = new TFSession(graph);
+            
+                var labels = File.ReadAllLines(labelsFile);
+                var runner = session.GetRunner();
+                runner.AddInput(graph["input"][0], tensor);
+                runner.Fetch(graph["MobilenetV2/Predictions/Reshape_1"][0]);
+
+                var output = runner.Run();
+
+                // Fetch the results from output:
+                TFTensor result = output[0];
+
+                bool jagged = true;
+
+                var bestIdx = 0;
+                float p = 0, best = 0;
+
+                // You can get the data in two ways, as a multi-dimensional array, or arrays of arrays, 
+                // code can be nicer to read with one or the other, pick it based on how you want to process
+                // it
+                if (jagged)
+                {
+                    var probabilities = ((float[][])result.GetValue(jagged: true))[0];
+                    for (int i = 0; i < probabilities.Length; i++)
+                    {
+                        if (probabilities[i] > best)
+                        {
+                            bestIdx = i;
+                            best = probabilities[i];
+                        }
+                    }
+                }
+                else
+                {
+                    var val = (float[,])result.GetValue(jagged: false);
+
+                    // Result is [1,N], flatten array
+                    for (int i = 0; i < val.GetLength(1); i++)
+                    {
+                        if (val[0, i] > best)
+                        {
+                            bestIdx = i;
+                            best = val[0, i];
+                        }
+                    }
+                }
+                Console.WriteLine($"best match: [{bestIdx}] {best * 100.0}% {labels[bestIdx]}");
+                
+            return isMonitorOrSimilarLabel(labels[bestIdx]);
+        }
+
+        private bool isMonitorOrSimilarLabel(string v)
+        {
+            return v.Equals("Monitor", StringComparison.OrdinalIgnoreCase) ||
+                v.Equals("Screen", StringComparison.OrdinalIgnoreCase) ||
+                v.Equals("television", StringComparison.OrdinalIgnoreCase) ||
+                v.Equals("website", StringComparison.OrdinalIgnoreCase);
+        }
+
+        static void ModelFiles(string dir)
+        {
+            modelFile = "Resources/model/mobilenet_v2_1.0_224_frozen.pb";
+            labelsFile = "Resources/model/labels.txt";
+            if (File.Exists(modelFile) && File.Exists(labelsFile))
+                return;
+        }
+\end{lstlisting}
+
+Per poter testare queste tecnologie in Xamarin abbiamo cercato una libreria cross-platform. Purtroppo la ricerca ha dimostrato che in questo ambito soluzioni multi-piattaforma non esistono o, se invece ci sono, funzionano male. Tensorflow ha il supporto sia per iOS che per Android, ma solo per lo sviluppo nativo. 
+Per poter usare qualcosa anche con Xamarin abbiamo trovato una libreria chiamata Tensorsharp che sono i bindings di C\# per Tensorflow. 
+
+\subsection{Test e risultati}%rob
+I risultati ottenuti con TensorFlowSharp su desktop sono stati abbastanza buoni. I tempi di elaborazione rimangono tra i 100 e i 150 ms. L'accuratezza del classificatore non è ottimale, ritorna risultati intorno al 50-60\% quando riconosce un monitor. Dato che nel modello pre-addestrato erano presenti più di mille label, abbiamo aggiunto il metodo isMonitorOrSimilarLabel per includere anche i nomi di elementi simili come schermo o televisione. A livello mobile tuttavia non siamo riusciti a testare questa funzione per questioni tempistiche.
 
 \chapter{Conclusioni}
-\section{risultati ottenuti}
-\subsection{obbiettivi raggiunti}
-\subsection{obbiettivi non raggiunti}
-\section{sviluppi futuri}%rob%rob
-\section{competenze aquisite}%rob%rob
+\section{Risultati ottenuti}
+\subsection{Obbiettivi raggiunti}
+Il primo obiettivo, quello di ritornare un'informazione associata data una fotografia è stato raggiunto. Infatti durante i nostri test il programma restituisce la stringa associata al momento della creazione della repository. 
+Il secondo obiettivo era quello di sviluppare le funzionalità come una libreria, in modo che la ditta DSwiss potesse utilizzarla successivamente. Questo intento è stato raggiunto parzialmente. La libreria infatti è completamente fruibile a livello desktop per ciò che riguarda le funzioni di feature matching e di utilizzo di tecnologie di Machine Learning. Tuttavia la implementazione per dispositivi mobili non è stata testata per iOS e per la versione Android manca l'implementazione della funzione di ricerca monitor, cioé quella sviluppata per mostrare un possibile utilizzo delle tecnologie di apprendimento automatico.
+Il terzo obiettivo è stato raggiunto pienamente in quanto tutto ciò che è stato sviluppato non richiede chiamate a codice esterno e tutte le operazioni sono elaborate localmente.
+\subsection{Obbiettivi non raggiunti}
+\section{Sviluppi futuri}%rob%rob
+Per l'utilizzo della libreria su mobile abbiamo pensato ad un flusso di lavoro come questo:
+\Decaa
+\includegraphics[width=\textwidth]{Pictures/flusso2.png}
+\Decaa
+%%%%%TODO%%%%
+Gli elementi che sono ancora da implementare sono il riconoscimento del logo, una ottimizzazione della gestione della repository locale e l'implementazione di tecnologie OCR per favorire l'inserimento di nuovi dati da parte dell'utente.
+
+\section{Competenze acquisite}%rob%rob
+Grazie a questo lavoro abbiamo approfondito le nostre conoscenze in ambito di machine learning e nello specifico dell'utilizzo delle convolutional neural network per costruire classificatori, utilizzando tecnologie quali Tensorflow e approfondendo leggermente le nostre competenze riguardo il linguaggio Python (che abbiamo usato per addestrare l'ultimo layer di una rete neurale). Grazie alla ricerca effettuata abbiamo capito che strumenti per utilizzare Machine Learning e Computer Vision con un tool multipiattaforma quale Xamarin, sono ancora immaturi. Pertanto il nostro suggerimento è quello di affidarsi allo sviluppo nativo ma anche quello di valutare attentamente di non utilizzare risorse locali ma di delegare il compito a servizi esterni. 
+\Decaa
+Durante lo sviluppo della libreria e dell'implementazione della demo, abbiamo avuto l'opportunità di imparare le basi dell'utilizzo del framework Xamarin. 
 
 \chapter{Piano dei lavori}%rob%rob
-
-
+\includegraphics[width=\textwidth]{Pictures/Piano_lavori1.png}
+\includegraphics[width=\textwidth]{Pictures/Piano_lavori2.png}
 
 
 %%% appendice %%%
@@ -597,7 +970,6 @@ Prima di ogni test è eseguito il metodo annotato con "TestInitialize" che
 % %Oppure anche direttamente nel testo ${1}\over{n}$ \\
 % %
 % %\lipsum[23]
-
 \bibliographystyle{unsrt}
 \bibliography{bibliografia}
 \end{document}
