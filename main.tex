@@ -5,6 +5,7 @@
 \usepackage{pdflscape}
 \usepackage{hyperref}
 \usepackage[export]{adjustbox}
+\usepackage{multicol}
 % per settare noindent
 \setlength{\parindent}{0pt}
 
@@ -412,6 +413,7 @@ Per ottimizzare quanto indicato sopra, abbiamo deciso di strutturare i dati, sal
     \includegraphics[width=0.8\textwidth]{Pictures/img_fondamentale_preproc.png}
 \end{figure}
 \newline
+Così facendo è anche possibile introdurre questi dati direttamente nel database locale dell'applicativo del committente.
 
 \subsubsection{Algoritmica fondamentale scelta - KAZE e SURF}
 Per evadere la logica principale di questa prima parte della nostra libreria, andremo ad utilizzare degli algoritrmi di feature detection e feature matching.
@@ -765,6 +767,7 @@ Come prima versione di questa libreria, i tempi di risposta sono accettabili. Da
 
 \newpage
 \section{Implementazione obbiettivi aggiuntivi}%rob
+\subsection{Utilizzo del machine learning}
 Per poter testare gli strumenti per l'utilizzo di Machine Learning, abbiamo implementato un semplice metodo che ritorna true se nell'immagine è presente un monitor (o uno schermo). Abbiamo usato Tensorflow per addestrare l'ultimo layer di una rete neurale già preaddestrata, dando in pasto al classificatore un centinaio di immagini contenenti monitor o schermi e altrettante senza monitor. Con così poche immagini di test il classificatore non funzionava correttamente. Restituiva infatti, come ci si può aspettare, che il monitor non era presente. Il dato che però tornava utile era la percentuale di confidenza della risposta. Infatti se il monitor era presente, la confidenza passava da un 99\% a un 94\%. 
 Abbiamo trovato in rete però un modello già addestrato che tra i nodi di output presenta la label "monitor", perfetto per i nostri test. Il modello si chiama MobileNetV2 ed ha un'architettura ottimizzata per i dispositivi mobili. Di seguito è mostrato un grafico che mette a confronto diverse reti neurali esistenti.
 \Decaa
@@ -850,11 +853,128 @@ I file da caricare nell'applicazione sono quindi solamente due: il modello, e la
 \end{lstlisting}
 
 Per poter testare queste tecnologie in Xamarin abbiamo cercato una libreria cross-platform. Purtroppo la ricerca ha dimostrato che in questo ambito soluzioni multi-piattaforma non esistono o, se invece ci sono, funzionano male. Tensorflow ha il supporto sia per iOS che per Android, ma solo per lo sviluppo nativo. 
-Per poter usare qualcosa anche con Xamarin abbiamo trovato una libreria chiamata Tensorsharp che sono i bindings di C\# per Tensorflow. 
+Per poter usare qualcosa anche con Xamarin abbiamo trovato una libreria chiamata TensorFlowSharp che sono i bindings di C\# per Tensorflow.
+
+\subsection{Creazione di un classificatore con rete neurale}
+In questa sezione, cercheremo di creare un classificatore con una rete neurale convoluzionale, con lo scopo di identificare il logo di un brand tra quelli "imparati" dal classificatore. Nello specifico, prenderemo come esempio 14 loghi conosciuti, ovvero:
+\begin{multicols}{3}
+\begin{itemize}
+\item Apple
+\item Facebook
+\item Google
+\item Youtube
+\item Twitter
+\item Microsoft
+\item Reddit
+\item Stack overflow
+\item Wikipedia
+\item Yahoo
+\item Gmail
+\item Hotmail
+\item Amazon
+\item Instagram
+\end{itemize}
+\end{multicols}
+
+\subsubsection{Costruzione di un dataset}
+Prima di tutto, per costruire un classificatore, è fondamentale ricavare un gran numero di dati, da inserire in un dataset.
+In rete è possibile trovare tantissimi dataset generici e open source, utili per creare classificatori di ogni genere.
+Nel nostro caso però, non abbiamo trovato alcun dataset già esistente contenente dei loghi di pagine web. Pertanto lo abbiamo creato noi.\Decaa
+Tramite l'applicazione "Google-Image-Download" già descritta in precedenza, siamo andati a scaricare 100 immagini per ognuno dei loghi sopracitati, ordinati poi con un sistema di directory. Purtroppo però, per il nostro classificatore, 100 immagini non bastano nemmeno per cominciare. Per aumentare il numero di immagini a nostra disposizione, possiamo crearne delle nuove a partire da quelle appena scaricate, modificandole tramite operazioni algebriche di: ridimensionamento, rotazione e stiratura delle immagini. Per fare questo, è stato utilizzato uno script in python.
+\begin{lstlisting}
+mport sys
+import Augmentor
+
+folder_name='folder'
+p= Augmentor.Pipeline(source_directory=folder_name,save_format="png")
+p.flip_left_right(0.5)
+p.black_and_white(0.1)
+p.gaussian_distortion(probability=0.4, grid_width=7, grid_height=6
+                      , magnitude=6, corner="ul", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
+
+p.rotate(0.3, 10,10)
+p.skew(0.4,0.5)
+p.skew_tilt(0.6,0.8)
+p.skew_left_right(0.5, magnitude=0.8)
+p.sample(100)
+\end{lstlisting}
+Così facendo, siamo riusciti ad arrivare a circa 14'000 immagini per allenare la nostra rete.
+Alcune di queste immagini potrebbero essere troppo poco chiare, per questo motivo è sempre bene dare uno sguardo visivo al dataset, per una superficiale rimozione di eventuali elementi anomali.
+
+\subsubsection{Preparazione del dataset}
+Per la costruzione del nostro classificatore, dobbiamo suddividere il dataset appena creato in una struttura di cartelle definita.
+A partire da una directory di origine, chiamata dataset, creare due nuove cartelle: "train" e "test". All'interno di queste due cartelle, bisogna definire un numero di cartelle pari alle classi che il classificatore dovrà riconoscere. Nel nostro caso, 14 cartelle chiamate con il nome del brand da riconoscere.
+La struttura dovrebbe presentarsi in questo modo:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.4\textwidth]{Pictures/keras_tree.PNG}
+\end{figure}
+\newline
+Infine, spostare 2/3 delle immagini ordinate per classe, all'interno della cartella "train" ed il restante 1/3 nella cartella "test". Ora la struttura è pronta per essere utilizzata.
+
+\subsubsection{Installazione ambiente Keras e Tensorflow tramite docker}
+Per implementare e testare il nostro classificatore, useremo una libreria di API chiamata Keras\cite{keras} che usa come backend Tensorflow. Esistono svariati modi per istallare questo ambiente, ma per aumentarne la portabilità, siamo andati ad usare un docker\cite{docker} previa installazione del client per il PC.
+\Decaa
+Una volta scaricato il docker per l'ambiente keras\cite{docker}, che si presenta in questo modo:
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1\textwidth]{Pictures/strutturaDirectory.PNG}
+\end{figure}
+\newline
+E gestito correttamente alcuni dei suoi parametri: 
+\begin{lstlisting}
+Docker-compose.yml
+version: '3'
+services:
+        keras:
+                image: gnap/keras:latest
+                volumes:
+                        - ./usingkeras:/usingkeras
+                entrypoint: /usingkeras/docker-entrypoint.sh
+                stdin_open: true
+
+\end{lstlisting}
+
+\begin{lstlisting}
+Dockerfile
+FROM gw000/keras:2.1.4
+
+RUN apt-get update -qq \
+ && apt-get install --no-install-recommends -y \
+    python-matplotlib \
+    python-pillow
+\end{lstlisting}
+
+L'ambiente è pronto. Sarà quindi possibile inserire il dataset all'interno di questa struttura, nella cartella "usingkeras" per poi iniziare il training.
+
+\subsubsection{Eseguire training e test del classificatore}
+Per avviare il training del nostro classificatore di esempio, assicurarsi che il file "docker-entrypoint.sh" all'interno della cartella "usingkeras" sia impostato come segue:
+\begin{lstlisting}
+#!/bin/bash
+cd /usingkeras/
+python /usingkeras/Training.py 
+#python /usingkeras/Testing.py
+\end{lstlisting}
+
+Successivamente, basta avviare il docker tramite il comando powershell:
+\begin{lstlisting}
+docker-compose up
+\end{lstlisting}
+Questo comando avvia il docker, esegue il contenuto del file "Docker-compose.yml" ed avvia lo script "/usingkeras/docker-entrypoint.sh"\Decaa
+A questo punto basta aspettare il completamento del training, da notare che questa operazione richiede molta potenza di calcolo (occupazione della CPU) ed un po' di tempo, a dipendenza del numero di classi e delle epoche da fare:
+
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=1\textwidth]{Pictures/training.PNG}
+\end{figure}
+\newline
+
+Al termine di questa operazione, il nostro classificatore con rete neurale è pronto.
 
 \subsection{Test e risultati}%rob
-I risultati ottenuti con TensorFlowSharp su desktop sono stati abbastanza buoni. I tempi di elaborazione rimangono tra i 100 e i 150 ms. L'accuratezza del classificatore non è ottimale, ritorna risultati intorno al 50-60\% quando riconosce un monitor. Dato che nel modello pre-addestrato erano presenti più di mille label, abbiamo aggiunto il metodo isMonitorOrSimilarLabel per includere anche i nomi di elementi simili come schermo o televisione. A livello mobile tuttavia non siamo riusciti a testare questa funzione per questioni tempistiche.
-
+I risultati ottenuti con TensorFlowSharp su desktop sono stati abbastanza buoni. I tempi di elaborazione rimangono tra i 100 e i 150 ms. L'accuratezza del classificatore non è ottimale, ritorna risultati intorno al 50-60\% quando riconosce un monitor. Dato che nel modello pre-addestrato erano presenti più di mille label, abbiamo aggiunto il metodo isMonitorOrSimilarLabel per includere anche i nomi di elementi simili come schermo o televisione, aumentandone la precisione. A livello mobile tuttavia non siamo riusciti a testare questa funzionalità per questioni tempistiche.
+\Decaa
+Il classificatore personalizzato creato per rilevare i loghi
 \chapter{Conclusioni}
 \section{Risultati ottenuti}
 \subsection{Obbiettivi raggiunti}
